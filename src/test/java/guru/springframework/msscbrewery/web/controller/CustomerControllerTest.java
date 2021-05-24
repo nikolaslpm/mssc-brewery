@@ -45,6 +45,8 @@ public class CustomerControllerTest {
     CustomerDto validCustomer;
 
     private final String API_BASE_PATH = "/api/v1/customer/";
+    private final String ERROR_MSG_NAME_SIZE = "[\"name : size must be between 3 and 100\"]";
+    private final String ERROR_MSG_NAME_BLANK = "[\"name : must not be blank\"]";
 
     @Before
     public void setUp() {
@@ -80,40 +82,6 @@ public class CustomerControllerTest {
     }
 
     @Test
-    public void givenNullNameWhenPostThenThrowException() throws Exception {
-        //given
-        CustomerDto customer = validCustomer;
-        customer.setName(null);
-        String customerDtoJson = objectMapper.writeValueAsString(customer);
-
-        mockMvc.perform(post(API_BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(customerDtoJson))
-            .andExpect(content().string("[\"name : must not be blank\"]"))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        verify(customerService, times(0)).saveNewCustomer(any());
-    }
-
-    @Test
-    public void givenInvalidNameSizeWhenPostThenThrowException() throws Exception {
-        //given
-        CustomerDto customer = validCustomer;
-        customer.setName("A");
-        String customerDtoJson = objectMapper.writeValueAsString(customer);
-
-        mockMvc.perform(post(API_BASE_PATH)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(customerDtoJson))
-            .andExpect(content().string("[\"name : size must be between 3 and 100\"]"))
-            .andExpect(status().isBadRequest())
-            .andReturn();
-
-        verify(customerService, times(0)).saveNewCustomer(any());
-    }
-
-    @Test
     public void handleUpdate() throws Exception {
         //given
         CustomerDto customer = validCustomer;
@@ -136,5 +104,74 @@ public class CustomerControllerTest {
             .andExpect(status().isNoContent());
 
         then(customerService).should().deleteById(any());
+    }
+
+    @Test
+    public void givenNullNameWhenHandlePostThenThrowException() throws Exception {
+        //given
+        CustomerDto customer = validCustomer;
+        customer.setName(null);
+        String customerDtoJson = objectMapper.writeValueAsString(customer);
+
+        mockMvc.perform(post(API_BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(customerDtoJson))
+            .andExpect(content().string(ERROR_MSG_NAME_BLANK))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        verify(customerService, times(0)).saveNewCustomer(any());
+    }
+
+    @Test
+    public void givenInvalidNameSizeWhenHandlePostThenThrowException() throws Exception {
+        //given
+        CustomerDto customer = validCustomer;
+        customer.setName("A");
+        String customerDtoJson = objectMapper.writeValueAsString(customer);
+
+        mockMvc.perform(post(API_BASE_PATH)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(customerDtoJson))
+            .andExpect(content().string(ERROR_MSG_NAME_SIZE))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        verify(customerService, times(0)).saveNewCustomer(any());
+    }
+
+
+    @Test
+    public void givenNullNameWhenHandleUpdateThenThrowException() throws Exception {
+        //given
+        CustomerDto customer = validCustomer;
+        customer.setName(null);
+        String customerDtoJson = objectMapper.writeValueAsString(customer);
+
+        mockMvc.perform(put(API_BASE_PATH + UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(customerDtoJson))
+            .andExpect(content().string(ERROR_MSG_NAME_BLANK))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        verify(customerService, times(0)).updateCustomer(any(), any());
+    }
+
+    @Test
+    public void givenInvalidNameSizeWhenHandleUpdateThenThrowException() throws Exception {
+        //given
+        CustomerDto customer = validCustomer;
+        customer.setName("A");
+        String customerDtoJson = objectMapper.writeValueAsString(customer);
+
+        mockMvc.perform(put(API_BASE_PATH + UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(customerDtoJson))
+            .andExpect(content().string(ERROR_MSG_NAME_SIZE))
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        verify(customerService, times(0)).updateCustomer(any(), any());
     }
 }
